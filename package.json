@@ -1,0 +1,26 @@
+{
+  "name": "com.wtfgames.hephaestus.vfx",
+  "version": "0.0.1",
+  "displayName": "Hephaestus VFX",
+  "description": "Hephaestus VFX is a part of the Hephaestus Core framework that helps operate with VFX.",
+  "unity": "2019.2",
+  "keywords": [
+    "unity",
+    "mobile",
+    "framework",
+    "vfx"
+  ],
+  "author": {
+    "name": "WTFGames",
+    "email": "serhii.chechui@gmail.com",
+    "url": "https://github.com/serhii-chechui/HephaestusVFX"
+  },
+  "dependencies": {
+    "com.wtfgames.hephaestus.core": "0.0.4"
+  }
+}
+        
+        
+        
+        
+        
