@@ -4,12 +4,12 @@ using UnityEditorInternal;
 using UnityEngine;
 
 namespace HephaestusMobile.VFXSystem.Editor {
-    [CustomEditor(typeof(VFXLibrary.VFXLibrary))]
+    [CustomEditor(typeof(VFXLibrary))]
     public class VFXLibraryEditor : UnityEditor.Editor {
         
         private ReorderableList _reorderableList;
 
-        private VFXLibrary.VFXLibrary VFXLibrary => target as VFXLibrary.VFXLibrary;
+        private VFXLibrary VFXLibrary => target as VFXLibrary;
 
         private void OnEnable() {
             if (VFXLibrary == null) return;

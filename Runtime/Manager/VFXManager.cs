@@ -3,7 +3,7 @@ using HephaestusMobile.VFXSystem.Config;
 
 namespace HephaestusMobile.VFXSystem.Manager {
     public class VFXManager : MonoBehaviour, IVFXManager {
-        private VFXLibrary.VFXLibrary _vfxLibrary;
+        private VFXLibrary _vfxLibrary;
         
         /// <inheritdoc cref="IVFXManager"/>
         public void Initialize(VFXManagerConfig vfxManagerConfig) {
