@@ -16,7 +16,7 @@
     "url": "https://github.com/serhii-chechui/HephaestusVFX"
   },
   "dependencies": {
-    "com.wtfgames.hephaestus.core": "0.0.4"
+    "com.svermeulen.extenject": "9.2.0-stcf3"
   }
 }
         
