@@ -1,10 +1,10 @@
 using System;
 using UnityEngine;
 
-namespace HephaestusMobile.VFXSystem.Config {
+namespace WTFGames.Hephaestus.VFX {
     [Serializable]
     public class VFXNamePair {
-        public string vfxName;
+        public int vfxType;
         public GameObject vfxPrefab;
     }
 }

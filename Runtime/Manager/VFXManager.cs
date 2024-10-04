@@ -1,20 +1,33 @@
+using System;
 using UnityEngine;
-using HephaestusMobile.VFXSystem.Config;
+using Zenject;
 
-namespace HephaestusMobile.VFXSystem.Manager {
-    public class VFXManager : MonoBehaviour, IVFXManager {
-        private VFXLibrary _vfxLibrary;
+namespace WTFGames.Hephaestus.VFX {
+    public class VFXManager : IInitializable, IDisposable, IVFXManager {
+        
+        [Inject]
+        private VFXManagerConfig _vfxManagerConfig;
+
+        private VFXManagerHandler _vfxManagerHandler;
         
         /// <inheritdoc cref="IVFXManager"/>
-        public void Initialize(VFXManagerConfig vfxManagerConfig) {
-            _vfxLibrary = vfxManagerConfig.vfxLibrary;
+        public void Initialize() {
+            if (_vfxManagerHandler == null)
+            {
+                _vfxManagerHandler = new GameObject("_vfxManagerHandler").AddComponent<VFXManagerHandler>();
+            }
+            
+            _vfxManagerHandler.Initialize(_vfxManagerConfig);
+        }
+        
+        public void Dispose()
+        {
+            
         }
 
         /// <inheritdoc cref="IVFXManager"/>
-        public void PlayVFX(string vfxName, Vector3 position, Transform parent = null) {
-            var vfx = _vfxLibrary.vfxList.Find(v => v.vfxName == vfxName).vfxPrefab;
-            var newVFX = Instantiate(vfx, parent, parent != null);
-            newVFX.transform.position = position;
+        public void PlayVFX(Enum vfxName, Vector3 position = default, Transform parent = null) {
+            _vfxManagerHandler.PlayVFX(vfxName, position, parent);
         }
     }
 }
