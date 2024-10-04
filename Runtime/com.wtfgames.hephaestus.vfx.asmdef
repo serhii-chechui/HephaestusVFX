@@ -1,0 +1,16 @@
+{
+    "name": "com.wtfgames.hephaestus.vfx",
+    "rootNamespace": "WTFGames.Hephaestus.VFX",
+    "references": [
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

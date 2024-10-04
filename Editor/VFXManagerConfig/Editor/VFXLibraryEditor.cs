@@ -1,15 +1,16 @@
-using HephaestusMobile.VFXSystem.Config;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace HephaestusMobile.VFXSystem.Editor {
+namespace WTFGames.Hephaestus.VFX.Editor {
     [CustomEditor(typeof(VFXLibrary))]
     public class VFXLibraryEditor : UnityEditor.Editor {
         
         private ReorderableList _reorderableList;
 
         private VFXLibrary VFXLibrary => target as VFXLibrary;
+        
+        private string[] _keys;
 
         private void OnEnable() {
             if (VFXLibrary == null) return;
@@ -41,6 +42,15 @@ namespace HephaestusMobile.VFXSystem.Editor {
         }
         
         public override void OnInspectorGUI() {
+            
+            var vfxLibrary = (VFXLibrary) target;
+            
+            if (vfxLibrary.widgetsLibraryConstants != null)
+            {
+                _keys = vfxLibrary.widgetsLibraryConstants.uiMapKeys.ToArray();
+                ConvertIntValuesFromKeys(_keys);
+            }
+            
             base.OnInspectorGUI();
 
             if (_reorderableList == null) return;
@@ -76,7 +86,12 @@ namespace HephaestusMobile.VFXSystem.Editor {
 
             EditorGUI.BeginChangeCheck();
 
-            item.vfxName = EditorGUI.TextField(new Rect(rect.x, rect.y, rect.width * 0.5f, EditorGUIUtility.singleLineHeight), item.vfxName);
+            item.vfxType = EditorGUI.Popup(
+                new Rect(rect.x, rect.y, rect.width * 0.5f - 40f, EditorGUIUtility.singleLineHeight),
+                item.vfxType,
+                _keys
+            );
+            
             item.vfxPrefab = (GameObject) EditorGUI.ObjectField(new Rect(rect.x + rect.width * 0.5f + 8f, rect.y, rect.width * 0.5f - 8f, EditorGUIUtility.singleLineHeight), item.vfxPrefab, typeof(GameObject), false);
 
             if (EditorGUI.EndChangeCheck()) {
@@ -89,13 +104,21 @@ namespace HephaestusMobile.VFXSystem.Editor {
         }
 
         private void AddItem(ReorderableList list) {
-            VFXLibrary.vfxList.Add(new VFXNamePair {vfxName = "NEW_VFX", vfxPrefab = null});
-            EditorUtility.SetDirty(target);
+            ReorderableList.defaultBehaviours.DoAddButton(list);
         }
 
         private void RemoveItem(ReorderableList list) {
-            VFXLibrary.vfxList.RemoveAt(list.index);
-            EditorUtility.SetDirty(target);
+            ReorderableList.defaultBehaviours.DoRemoveButton(list);
+        }
+        
+        private void ConvertIntValuesFromKeys(string[] input)
+        {
+            var options = new int[input.Length];
+
+            for (int i = 0; i < options.Length; i++)
+            {
+                options[i] = i;
+            }
         }
     }
 }

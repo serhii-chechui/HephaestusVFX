@@ -1,14 +1,14 @@
+using System;
 using UnityEngine;
-using HephaestusMobile.VFXSystem.Config;
 
-namespace HephaestusMobile.VFXSystem.Manager {
+namespace WTFGames.Hephaestus.VFX {
     public interface IVFXManager {
         
         /// <summary>
         /// Initialize the VFX manager.
         /// </summary>
         /// <param name="vfxManagerConfig">VFXManagerConfig file.</param>
-        void Initialize(VFXManagerConfig vfxManagerConfig);
+        void Initialize();
         
         /// <summary>
         /// Insttantiate and play VFX entity.
@@ -16,6 +16,6 @@ namespace HephaestusMobile.VFXSystem.Manager {
         /// <param name="vfxName">VFX name.</param>
         /// <param name="position">Desired position.</param>
         /// <param name="parent">Parent object.</param>
-        void PlayVFX(string vfxName, Vector3 position, Transform parent = null);
+        void PlayVFX(Enum vfxName, Vector3 position, Transform parent = null);
     }
 }
