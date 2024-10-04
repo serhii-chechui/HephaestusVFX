@@ -1,6 +1,6 @@
 {
   "name": "com.wtfgames.hephaestus.vfx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Hephaestus VFX",
   "description": "Hephaestus VFX is a part of the Hephaestus Core framework that helps operate with VFX.",
   "unity": "2019.2",
@@ -17,5 +17,8 @@
   },
   "dependencies": {
     "com.svermeulen.extenject": "9.2.0-stcf3"
+  },
+  "publishConfig": {
+    "registry": "http://upm.wtfgames.com.ua/"
   }
 }
