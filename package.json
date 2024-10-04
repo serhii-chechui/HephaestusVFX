@@ -17,5 +17,8 @@
   },
   "dependencies": {
     "com.svermeulen.extenject": "9.2.0-stcf3"
+  },
+  "publishConfig": {
+    "registry": "http://upm.wtfgames.com.ua/"
   }
 }
