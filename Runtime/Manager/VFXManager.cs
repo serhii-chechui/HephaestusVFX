@@ -11,7 +11,9 @@ namespace WTFGames.Hephaestus.VFX {
 
         private VFXManagerHandler _vfxManagerHandler;
 
-        /// <inheritdoc cref="IVFXManager.Initialize"/>
+        /// <summary>
+        /// Creates the VFX handler. Zenject calls it through IInitializable.
+        /// </summary>
         public void Initialize() {
             if (_vfxManagerHandler != null) return;
 

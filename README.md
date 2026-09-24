@@ -75,8 +75,7 @@ public override void InstallBindings()
 }
 ```
 
-This binds `IVFXManager` as a singleton. Zenject initializes it, so there is no
-need to call `Initialize()` yourself.
+This binds `IVFXManager` as a singleton; Zenject initializes and disposes it.
 
 ## Usage
 
