@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -5,58 +7,37 @@ using UnityEngine;
 namespace WTFGames.Hephaestus.VFX.Editor {
     [CustomEditor(typeof(VFXLibrary))]
     public class VFXLibraryEditor : UnityEditor.Editor {
-        
+
+        private SerializedProperty _vfxListProperty;
+
         private ReorderableList _reorderableList;
 
-        private VFXLibrary VFXLibrary => target as VFXLibrary;
-        
-        private string[] _keys;
+        private string[] _keyNames = Array.Empty<string>();
+
+        private int[] _keyIds = Array.Empty<int>();
 
         private void OnEnable() {
-            if (VFXLibrary == null) return;
+            _vfxListProperty = serializedObject.FindProperty(nameof(VFXLibrary.vfxList));
 
-            _reorderableList = new ReorderableList(VFXLibrary.vfxList, typeof(VFXNamePair), true, true, true, true);
-
-            // This could be used aswell, but I only advise this your class inherrits from UnityEngine.Object or has a CustomPropertyDrawer
-            // Since you'll find your item using: serializedObject.FindProperty("list").GetArrayElementAtIndex(index).objectReferenceValue
-            // which is a UnityEngine.Object
-            // reorderableList = new ReorderableList(serializedObject, serializedObject.FindProperty("list"), true, true, true, true);
-
-            // Add listeners to draw events
-            _reorderableList.drawHeaderCallback += DrawHeader;
-            _reorderableList.drawElementCallback += DrawElement;
-
-            _reorderableList.onAddCallback += AddItem;
-            _reorderableList.onRemoveCallback += RemoveItem;
+            _reorderableList = new ReorderableList(serializedObject, _vfxListProperty, true, true, true, true) {
+                drawHeaderCallback = DrawHeader,
+                drawElementCallback = DrawElement
+            };
         }
 
-        private void OnDisable() {
-            if (_reorderableList == null) return;
-
-            // Make sure we don't get memory leaks etc.
-            _reorderableList.drawHeaderCallback -= DrawHeader;
-            _reorderableList.drawElementCallback -= DrawElement;
-
-            _reorderableList.onAddCallback -= AddItem;
-            _reorderableList.onRemoveCallback -= RemoveItem;
-        }
-        
         public override void OnInspectorGUI() {
-            
-            var vfxLibrary = (VFXLibrary) target;
-            
-            if (vfxLibrary.widgetsLibraryConstants != null)
-            {
-                _keys = vfxLibrary.widgetsLibraryConstants.uiMapKeys.ToArray();
-                ConvertIntValuesFromKeys(_keys);
-            }
-            
             base.OnInspectorGUI();
 
-            if (_reorderableList == null) return;
+            serializedObject.Update();
+
+            CacheKeys();
 
             // Actually draw the list in the inspector
             _reorderableList.DoLayoutList();
+
+            DrawDuplicatesWarning();
+
+            serializedObject.ApplyModifiedProperties();
 
             EditorGUILayout.Space();
 
@@ -66,59 +47,74 @@ namespace WTFGames.Hephaestus.VFX.Editor {
             }
         }
 
+        private void CacheKeys() {
+            var constants = ((VFXLibrary) target).widgetsLibraryConstants;
+
+            if (constants == null) {
+                _keyNames = Array.Empty<string>();
+                _keyIds = Array.Empty<int>();
+                EditorGUILayout.HelpBox($"Assign {nameof(VFXLibraryConstants)} to pick VFX keys.", MessageType.Warning);
+                return;
+            }
+
+            _keyNames = constants.keys.Select(key => key.name).ToArray();
+            _keyIds = constants.keys.Select(key => key.id).ToArray();
+        }
+
+        private void DrawDuplicatesWarning() {
+            var duplicates = Enumerable.Range(0, _vfxListProperty.arraySize)
+                .Select(i => _vfxListProperty.GetArrayElementAtIndex(i).FindPropertyRelative(nameof(VFXNamePair.vfxType)).intValue)
+                .GroupBy(id => id)
+                .Where(group => group.Count() > 1)
+                .Select(group => GetKeyLabel(group.Key))
+                .ToArray();
+
+            if (duplicates.Length > 0) {
+                EditorGUILayout.HelpBox($"Several prefabs are mapped to {string.Join(", ", duplicates)}; only the first one is used.", MessageType.Warning);
+            }
+        }
+
         /// <summary>
         /// Draws the header of the list
         /// </summary>
-        /// <param name="rect"></param>
         private void DrawHeader(Rect rect) {
             GUI.Label(rect, "Dependencies between VFX name and Prefab based on Particles System.", EditorStyles.boldLabel);
         }
 
         /// <summary>
-        /// Draws one element of the list (ListItemExample)
+        /// Draws one element of the list
         /// </summary>
-        /// <param name="rect"></param>
-        /// <param name="index"></param>
-        /// <param name="active"></param>
-        /// <param name="focused"></param>
         private void DrawElement(Rect rect, int index, bool active, bool focused) {
-            var item = VFXLibrary.vfxList[index];
+            var element = _vfxListProperty.GetArrayElementAtIndex(index);
+            var typeProperty = element.FindPropertyRelative(nameof(VFXNamePair.vfxType));
+            var prefabProperty = element.FindPropertyRelative(nameof(VFXNamePair.vfxPrefab));
 
-            EditorGUI.BeginChangeCheck();
+            var names = _keyNames;
+            var ids = _keyIds;
 
-            item.vfxType = EditorGUI.Popup(
+            // Keep an entry whose key was removed visible instead of silently remapping it to another key.
+            if (!ids.Contains(typeProperty.intValue)) {
+                names = names.Append(GetKeyLabel(typeProperty.intValue)).ToArray();
+                ids = ids.Append(typeProperty.intValue).ToArray();
+            }
+
+            typeProperty.intValue = EditorGUI.IntPopup(
                 new Rect(rect.x, rect.y, rect.width * 0.5f - 40f, EditorGUIUtility.singleLineHeight),
-                item.vfxType,
-                _keys
+                typeProperty.intValue,
+                names,
+                ids
             );
-            
-            item.vfxPrefab = (GameObject) EditorGUI.ObjectField(new Rect(rect.x + rect.width * 0.5f + 8f, rect.y, rect.width * 0.5f - 8f, EditorGUIUtility.singleLineHeight), item.vfxPrefab, typeof(GameObject), false);
 
-            if (EditorGUI.EndChangeCheck()) {
-                EditorUtility.SetDirty(target);
-            }
-
-            // If you are using a custom PropertyDrawer, this is probably better
-            // EditorGUI.PropertyField(rect, serializedObject.FindProperty("list").GetArrayElementAtIndex(index));
-            // Although it is probably smart to cach the list as a private variable ;)
+            EditorGUI.PropertyField(
+                new Rect(rect.x + rect.width * 0.5f + 8f, rect.y, rect.width * 0.5f - 8f, EditorGUIUtility.singleLineHeight),
+                prefabProperty,
+                GUIContent.none
+            );
         }
 
-        private void AddItem(ReorderableList list) {
-            ReorderableList.defaultBehaviours.DoAddButton(list);
-        }
-
-        private void RemoveItem(ReorderableList list) {
-            ReorderableList.defaultBehaviours.DoRemoveButton(list);
-        }
-        
-        private void ConvertIntValuesFromKeys(string[] input)
-        {
-            var options = new int[input.Length];
-
-            for (int i = 0; i < options.Length; i++)
-            {
-                options[i] = i;
-            }
+        private string GetKeyLabel(int id) {
+            var index = Array.IndexOf(_keyIds, id);
+            return index >= 0 ? _keyNames[index] : $"<Missing key {id}>";
         }
     }
 }
