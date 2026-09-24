@@ -9,6 +9,7 @@ keys generated from a config.
 - Spawn VFX prefabs by strongly-typed `enum` keys (generated from a config asset).
 - Stable key ids: reordering or removing keys never remaps existing library entries.
 - Non-looping particle effects destroy themselves once their particles finish.
+- Automatic setup: missing config assets are created and linked after import.
 - Editor tooling: key list with validation, enum export, key → prefab library with Undo.
 
 ## Installation
@@ -39,15 +40,22 @@ Extenject (Zenject) from OpenUPM. Add both registries and the package to your
 
 ## Setup
 
-### 1. Create the assets
+### 1. Assets
 
-Via the `Create > HephaestusMobile/Core/VFX` menu, create:
+The package sets up its assets automatically after it is imported and on every
+script reload. It looks for each asset anywhere in the project and creates the
+missing ones in `Assets/Hephaestus/VFX`:
 
-- **VFXLibraryConstants** — the list of VFX keys.
-- **VFXLibrary** — maps each key to a prefab (assign the `VFXLibraryConstants`
-  asset to it).
+- **VFXLibraryConstants** — the list of VFX keys; the enum export folder
+  defaults to `Assets/Hephaestus/VFX`.
+- **VFXLibrary** — maps each key to a prefab; references `VFXLibraryConstants`.
 - **VFXManagerConfig** — references the `VFXLibrary`.
 - **HephaestusVFXManagerSOInstaller** — references the `VFXManagerConfig`.
+
+Only empty references are filled in, so references you assign yourself are kept.
+Run it manually with **Hephaestus > VFX > Set Up Assets**. It doesn't run
+automatically in batch mode. The assets can also be created by hand via the
+`Create > HephaestusMobile/Core/VFX` menu.
 
 ### 2. Define VFX keys and export the enum
 
