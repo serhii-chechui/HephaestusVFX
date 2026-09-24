@@ -30,32 +30,51 @@ namespace WTFGames.Hephaestus.VFX.Editor
         [MenuItem("Hephaestus/VFX/Set Up Assets")]
         public static void Run()
         {
+            SetUp(AssetsFolder);
+        }
+
+        /// <summary>
+        /// Sets up the assets using <paramref name="folder"/> for the missing ones and returns what was changed.
+        /// Existing assets are searched in <paramref name="searchInFolders"/>, or in the whole project when it is null.
+        /// </summary>
+        internal static List<string> SetUp(string folder, string[] searchInFolders = null)
+        {
             var report = new List<string>();
 
-            var constants = FindOrCreate<VFXLibraryConstants>(report);
-            var library = FindOrCreate<VFXLibrary>(report);
-            var config = FindOrCreate<VFXManagerConfig>(report);
-            var installer = FindOrCreate<HephaestusVFXManagerSOInstaller>(report);
+            var constants = FindOrCreate<VFXLibraryConstants>(folder, searchInFolders, report);
+            var library = FindOrCreate<VFXLibrary>(folder, searchInFolders, report);
+            var config = FindOrCreate<VFXManagerConfig>(folder, searchInFolders, report);
+            var installer = FindOrCreate<HephaestusVFXManagerSOInstaller>(folder, searchInFolders, report);
 
-            SetPathIfEmpty(constants, nameof(VFXLibraryConstants.enumsPath), AssetsFolder, report);
+            SetPathIfEmpty(constants, nameof(VFXLibraryConstants.enumsPath), folder, report);
             LinkIfEmpty(library, nameof(VFXLibrary.vfxLibraryConstants), constants, report);
             LinkIfEmpty(config, nameof(VFXManagerConfig.vfxLibrary), library, report);
             LinkIfEmpty(installer, "vfxManagerConfig", config, report);
 
-            if (report.Count == 0) return;
+            if (report.Count == 0) return report;
 
             AssetDatabase.SaveAssets();
             Debug.Log($"[Hephaestus VFX] Assets set up:\n{string.Join("\n", report)}");
+
+            return report;
         }
 
         /// <summary>
-        /// Returns an existing asset of the type, preferring one in <see cref="AssetsFolder"/>, or creates it there.
+        /// Returns an existing asset of the type, preferring one in <paramref name="folder"/>, or creates it there.
         /// </summary>
-        private static T FindOrCreate<T>(List<string> report) where T : ScriptableObject
+        private static T FindOrCreate<T>(string folder, string[] searchInFolders, List<string> report) where T : ScriptableObject
         {
-            var paths = AssetDatabase.FindAssets($"t:{typeof(T).Name}")
+            var filter = $"t:{typeof(T).Name}";
+            var existingFolders = searchInFolders?.Where(AssetDatabase.IsValidFolder).ToArray();
+
+            // Search nothing, rather than the whole project, when none of the given folders exists.
+            var guids = existingFolders == null
+                ? AssetDatabase.FindAssets(filter)
+                : existingFolders.Length > 0 ? AssetDatabase.FindAssets(filter, existingFolders) : new string[0];
+
+            var paths = guids
                 .Select(AssetDatabase.GUIDToAssetPath)
-                .OrderByDescending(path => path.StartsWith(AssetsFolder + "/"))
+                .OrderByDescending(path => path.StartsWith(folder + "/"))
                 .ToList();
 
             foreach (var path in paths)
@@ -65,10 +84,10 @@ namespace WTFGames.Hephaestus.VFX.Editor
                 if (existing != null) return existing;
             }
 
-            EnsureFolder(AssetsFolder);
+            EnsureFolder(folder);
 
             var asset = ScriptableObject.CreateInstance<T>();
-            var assetPath = $"{AssetsFolder}/{typeof(T).Name}.asset";
+            var assetPath = $"{folder}/{typeof(T).Name}.asset";
             AssetDatabase.CreateAsset(asset, assetPath);
             report.Add($"created {assetPath}");
 
