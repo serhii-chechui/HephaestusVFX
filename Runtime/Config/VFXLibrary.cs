@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace WTFGames.Hephaestus.VFX {
     [CreateAssetMenu(fileName = "VFXLibrary", menuName = "HephaestusMobile/Core/VFX/VFXLibrary")]
     public class VFXLibrary : ScriptableObject {
 
-        public VFXLibraryConstants widgetsLibraryConstants;
+        [FormerlySerializedAs("widgetsLibraryConstants")]
+        public VFXLibraryConstants vfxLibraryConstants;
 
         [HideInInspector]
         public List<VFXNamePair> vfxList = new List<VFXNamePair>();

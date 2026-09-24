@@ -48,7 +48,7 @@ namespace WTFGames.Hephaestus.VFX.Editor {
         }
 
         private void CacheKeys() {
-            var constants = ((VFXLibrary) target).widgetsLibraryConstants;
+            var constants = ((VFXLibrary) target).vfxLibraryConstants;
 
             if (constants == null) {
                 _keyNames = Array.Empty<string>();
