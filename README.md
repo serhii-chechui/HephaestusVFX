@@ -33,7 +33,7 @@ Extenject (Zenject) from OpenUPM. Add both registries and the package to your
     }
   ],
   "dependencies": {
-    "com.wtfgames.hephaestus.vfx": "1.0.1"
+    "com.wtfgames.hephaestus.vfx": "2.0.0"
   }
 }
 ```
@@ -63,8 +63,9 @@ Select the `VFXLibraryConstants` asset:
 
 1. Add keys (e.g. `EXPLOSION`, `HIT_SPARKS`). Keys are upper case; spaces become
    underscores.
-2. Pick an output folder inside the project and click **Export to enum**. It
-   generates a `byte` enum in the `{CompanyName}.{ProductName}.VFX` namespace.
+2. Click **Export to enum** (the folder defaults to `Assets/Hephaestus/VFX`;
+   **Pick** another one inside the project if needed). It generates a `byte`
+   enum in the `{CompanyName}.{ProductName}.VFX` namespace.
 3. On the `VFXLibrary` asset, bind each key to its prefab.
 
 Every key gets a permanent id that becomes its enum value. Ids are never reused,
@@ -110,6 +111,18 @@ parented to `parent` when one is passed.
 - Looping effects and prefabs without particle systems stay alive; destroy them
   yourself.
 - A key without a mapped prefab logs a warning and spawns nothing.
+
+## Tests
+
+The package ships PlayMode tests for the runtime and EditMode tests for the
+editor. To run them in a project, add the package to `testables` in
+`Packages/manifest.json` and open **Window > General > Test Runner**:
+
+```json
+{
+  "testables": ["com.wtfgames.hephaestus.vfx"]
+}
+```
 
 ## Requirements
 
