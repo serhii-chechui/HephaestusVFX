@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file in accordance with the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guidelines.
 
-## [Unreleased]
+## [2.0.0] - 2026-09-24
+
+### BREAKING CHANGES
+- `IVFXManager.Initialize` is removed: Zenject initializes the manager through `IInitializable`. Drop explicit calls to it.
+- `VFXLibrary.widgetsLibraryConstants` is renamed to `vfxLibraryConstants`. Existing `VFXLibrary` assets keep their reference.
+- `VFXLibraryConstants.uiMapKeys` is no longer public; use `VFXLibraryConstants.keys`. Existing assets are migrated automatically.
+
+### feat
+- After import and on every script reload (not in batch mode) the package finds its assets anywhere in the project, creates the missing ones in `Assets/Hephaestus/VFX` and links them: `VFXLibrary` → `VFXLibraryConstants`, `VFXManagerConfig` → `VFXLibrary`, `HephaestusVFXManagerSOInstaller` → `VFXManagerConfig`. Only empty references are filled. Also available as **Hephaestus > VFX > Set Up Assets**.
 
 ### fix
 - Renamed `HephaestusUIManagerSOInstaller.cs` to `HephaestusVFXManagerSOInstaller.cs` so the ScriptableObject script matches its class name. The GUID is kept, existing installer assets stay valid.
@@ -15,11 +23,22 @@ All notable changes to this project will be documented in this file in accordanc
 - Enum export validates keys, the enum class name and the export folder, sanitizes the namespace and keeps the folder when the dialog is cancelled.
 - The `VFXLibraryConstants` and `VFXLibrary` inspectors support Undo.
 
-### deprecated
-- `IVFXManager.Initialize` is obsolete: Zenject initializes the manager through `IInitializable`. It will be removed from the interface in the next major version.
+### refactor
+- Moved the editor scripts from `Editor/VFXManagerConfig/Editor/` to `Editor/`.
+- Extracted key validation (`VFXKeysValidation`) and enum generation (`VFXEnumGenerator`) from the `VFXLibraryConstants` inspector.
 
-### changed
-- `VFXLibraryConstants.uiMapKeys` is no longer public; use `VFXLibraryConstants.keys`.
+### test
+- Added PlayMode tests for the runtime (library lookup, key migration, spawning, effect lifetime, handler lifecycle) and EditMode tests for the editor (identifiers, key validation, enum generation, asset setup).
+
+### docs
+- Wrote the README and restored the changelog for 0.0.3–1.0.1.
+- Added the GPL-3.0-or-later copyright notice to `LICENSE.md` and removed the duplicate `LICENSE`.
+
+### build
+- Declared `GPL-3.0-or-later` in `package.json` and switched the publish registry to https.
+
+### ci
+- Publish the package to the registry when a GitHub release is published.
 
 ## [1.0.1] - 2024-10-04
 
