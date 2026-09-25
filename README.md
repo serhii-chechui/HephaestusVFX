@@ -33,7 +33,7 @@ Extenject (Zenject) from OpenUPM. Add both registries and the package to your
     }
   ],
   "dependencies": {
-    "com.wtfgames.hephaestus.vfx": "2.0.0"
+    "com.wtfgames.hephaestus.vfx": "2.0.1"
   }
 }
 ```
