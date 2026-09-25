@@ -14,6 +14,9 @@ namespace WTFGames.Hephaestus.VFX.Editor
     {
         public const string AssetsFolder = "Assets/Hephaestus/Config/VFX";
 
+        // The default folder of version 2.0.0, still stored as the enum export path in assets it created.
+        internal const string LegacyAssetsFolder = "Assets/Hephaestus/VFX";
+
         static VFXAssetsSetup()
         {
             // Don't change projects during batch mode builds.
@@ -46,7 +49,7 @@ namespace WTFGames.Hephaestus.VFX.Editor
             var config = FindOrCreate<VFXManagerConfig>(folder, searchInFolders, report);
             var installer = FindOrCreate<HephaestusVFXManagerSOInstaller>(folder, searchInFolders, report);
 
-            SetPathIfEmpty(constants, nameof(VFXLibraryConstants.enumsPath), folder, report);
+            SetPathIfUnset(constants, nameof(VFXLibraryConstants.enumsPath), folder, report);
             LinkIfEmpty(library, nameof(VFXLibrary.vfxLibraryConstants), constants, report);
             LinkIfEmpty(config, nameof(VFXManagerConfig.vfxLibrary), library, report);
             LinkIfEmpty(installer, "vfxManagerConfig", config, report);
@@ -106,12 +109,19 @@ namespace WTFGames.Hephaestus.VFX.Editor
             report.Add($"linked {target.name}.{propertyName} -> {value.name}");
         }
 
-        private static void SetPathIfEmpty(Object target, string propertyName, string value, List<string> report)
+        /// <summary>
+        /// Sets the path when it is empty or still the removed 2.0.0 default; paths chosen by the user are kept.
+        /// </summary>
+        private static void SetPathIfUnset(Object target, string propertyName, string value, List<string> report)
         {
             var serializedObject = new SerializedObject(target);
             var property = serializedObject.FindProperty(propertyName);
+            var current = property.stringValue;
 
-            if (!string.IsNullOrEmpty(property.stringValue)) return;
+            var isUnset = string.IsNullOrEmpty(current)
+                || current == LegacyAssetsFolder && !AssetDatabase.IsValidFolder(LegacyAssetsFolder);
+
+            if (!isUnset || current == value) return;
 
             property.stringValue = value;
             serializedObject.ApplyModifiedPropertiesWithoutUndo();

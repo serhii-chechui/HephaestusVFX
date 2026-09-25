@@ -89,6 +89,38 @@ namespace WTFGames.Hephaestus.VFX.Editor.Tests
         }
 
         [Test]
+        public void SetUp_KeepsCustomEnumsPathToMissingFolder()
+        {
+            // The folder is created on export, so a path to it is a valid choice.
+            VFXAssetsSetup.SetUp(Folder, SearchFolders);
+
+            var constants = Load<VFXLibraryConstants>();
+            constants.enumsPath = "Assets/__HephaestusVFXTestsNotCreated";
+            EditorUtility.SetDirty(constants);
+
+            VFXAssetsSetup.SetUp(Folder, SearchFolders);
+
+            Assert.AreEqual("Assets/__HephaestusVFXTestsNotCreated", Load<VFXLibraryConstants>().enumsPath);
+        }
+
+        [Test]
+        public void SetUp_RemovedLegacyDefaultEnumsPath_IsReplaced()
+        {
+            Assume.That(AssetDatabase.IsValidFolder(VFXAssetsSetup.LegacyAssetsFolder), Is.False, "The project has the legacy folder.");
+
+            VFXAssetsSetup.SetUp(Folder, SearchFolders);
+
+            var constants = Load<VFXLibraryConstants>();
+            constants.enumsPath = VFXAssetsSetup.LegacyAssetsFolder;
+            EditorUtility.SetDirty(constants);
+
+            var report = VFXAssetsSetup.SetUp(Folder, SearchFolders);
+
+            Assert.AreEqual(Folder, Load<VFXLibraryConstants>().enumsPath);
+            CollectionAssert.AreEqual(new[] { $"set VFXLibraryConstants.enumsPath = {Folder}" }, report);
+        }
+
+        [Test]
         public void SetUp_DeletedAssetAndEmptyLink_AreRestored()
         {
             VFXAssetsSetup.SetUp(Folder, SearchFolders);
