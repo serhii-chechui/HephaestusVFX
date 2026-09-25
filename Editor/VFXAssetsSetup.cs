@@ -12,7 +12,7 @@ namespace WTFGames.Hephaestus.VFX.Editor
     [InitializeOnLoad]
     public static class VFXAssetsSetup
     {
-        public const string AssetsFolder = "Assets/Hephaestus/VFX";
+        public const string AssetsFolder = "Assets/Hephaestus/Config/VFX";
 
         static VFXAssetsSetup()
         {

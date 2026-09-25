@@ -44,10 +44,10 @@ Extenject (Zenject) from OpenUPM. Add both registries and the package to your
 
 The package sets up its assets automatically after it is imported and on every
 script reload. It looks for each asset anywhere in the project and creates the
-missing ones in `Assets/Hephaestus/VFX`:
+missing ones in `Assets/Hephaestus/Config/VFX`:
 
 - **VFXLibraryConstants** — the list of VFX keys; the enum export folder
-  defaults to `Assets/Hephaestus/VFX`.
+  defaults to `Assets/Hephaestus/Config/VFX`.
 - **VFXLibrary** — maps each key to a prefab; references `VFXLibraryConstants`.
 - **VFXManagerConfig** — references the `VFXLibrary`.
 - **HephaestusVFXManagerSOInstaller** — references the `VFXManagerConfig`.
@@ -63,7 +63,7 @@ Select the `VFXLibraryConstants` asset:
 
 1. Add keys (e.g. `EXPLOSION`, `HIT_SPARKS`). Keys are upper case; spaces become
    underscores.
-2. Click **Export to enum** (the folder defaults to `Assets/Hephaestus/VFX`;
+2. Click **Export to enum** (the folder defaults to `Assets/Hephaestus/Config/VFX`;
    **Pick** another one inside the project if needed). It generates a `byte`
    enum in the `{CompanyName}.{ProductName}.VFX` namespace.
 3. On the `VFXLibrary` asset, bind each key to its prefab.
