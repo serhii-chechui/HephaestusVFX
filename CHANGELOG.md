@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file in accordance with the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guidelines.
 
+## [2.0.2] - 2026-09-25
+
+### fix
+- The folder picked with **Pick** in the `VFXLibraryConstants` inspector is saved and used for the enum export. The folder dialog used to break the inspector layout (`EndLayoutGroup: BeginLayoutGroup must be called first`) before the path was stored.
+- The enum export path can be typed in; a missing export folder is created on export instead of blocking it.
+- The asset setup replaces the export path `Assets/Hephaestus/VFX` left by 2.0.0 with `Assets/Hephaestus/Config/VFX` when that old folder no longer exists.
+
 ## [2.0.1] - 2026-09-25
 
 ### fix
