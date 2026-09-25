@@ -69,20 +69,11 @@ namespace WTFGames.Hephaestus.VFX.Editor
 
             EditorGUILayout.BeginHorizontal();
 
-            if (!string.IsNullOrEmpty(_enumsPathProperty.stringValue))
-            {
-                EditorGUILayout.LabelField("Path", _enumsPathProperty.stringValue, GUILayout.ExpandWidth(true));
-            }
+            _enumsPathProperty.stringValue = EditorGUILayout.TextField("Path", _enumsPathProperty.stringValue);
 
             if (GUILayout.Button("Pick", GUILayout.Width(96)))
             {
-                var pickedPath = EditorUtility.OpenFolderPanel("Pick The Folder", GetAbsoluteEnumsPath(_enumsPathProperty.stringValue), "");
-
-                // An empty path means the dialog was cancelled.
-                if (!string.IsNullOrEmpty(pickedPath))
-                {
-                    _enumsPathProperty.stringValue = ToProjectRelativePath(pickedPath);
-                }
+                PickEnumsFolder();
             }
 
             EditorGUILayout.EndHorizontal();
@@ -92,6 +83,13 @@ namespace WTFGames.Hephaestus.VFX.Editor
             foreach (var error in exportErrors)
             {
                 EditorGUILayout.HelpBox(error, MessageType.Error);
+            }
+
+            var enumsFolder = GetAbsoluteEnumsPath(_enumsPathProperty.stringValue);
+
+            if (exportErrors.Count == 0 && !Directory.Exists(enumsFolder))
+            {
+                EditorGUILayout.HelpBox($"The folder {_enumsPathProperty.stringValue} will be created on export.", MessageType.Info);
             }
 
             GUI.enabled = exportErrors.Count == 0;
@@ -194,10 +192,6 @@ namespace WTFGames.Hephaestus.VFX.Editor
             {
                 errors.Add("Pick the folder to export the enum to.");
             }
-            else if (!Directory.Exists(GetAbsoluteEnumsPath(_enumsPathProperty.stringValue)))
-            {
-                errors.Add($"The folder {_enumsPathProperty.stringValue} doesn't exist.");
-            }
 
             return errors;
         }
@@ -219,10 +213,42 @@ namespace WTFGames.Hephaestus.VFX.Editor
             var namespaceName = VFXEnumGenerator.GetNamespace(Application.companyName, Application.productName, EntityType);
             var source = VFXEnumGenerator.Generate(namespaceName, _enumClassName, vfxLibraryConstants.keys);
 
-            var filePath = Path.Combine(GetAbsoluteEnumsPath(vfxLibraryConstants.enumsPath), $"{_enumClassName}.cs");
-            File.WriteAllText(filePath, source);
+            var folder = GetAbsoluteEnumsPath(vfxLibraryConstants.enumsPath);
+            string filePath;
+
+            try
+            {
+                filePath = Path.Combine(folder, $"{_enumClassName}.cs");
+                Directory.CreateDirectory(folder);
+                File.WriteAllText(filePath, source);
+            }
+            catch (System.Exception exception) when (exception is IOException || exception is System.UnauthorizedAccessException || exception is System.ArgumentException || exception is System.NotSupportedException)
+            {
+                Debug.LogError($"[Hephaestus VFX] Can't export the enum to {folder}: {exception.Message}");
+                return;
+            }
 
             AssetDatabase.Refresh();
+            Debug.Log($"[Hephaestus VFX] Exported {_enumClassName} to {filePath}.");
+        }
+
+        private void PickEnumsFolder()
+        {
+            var projectRoot = GetProjectRoot();
+            var startFolder = VFXProjectPaths.GetClosestExistingFolder(GetAbsoluteEnumsPath(_enumsPathProperty.stringValue), Application.dataPath);
+            var pickedPath = EditorUtility.OpenFolderPanel("Pick the folder to export the enum to", startFolder, "");
+
+            // An empty path means the dialog was cancelled.
+            if (!string.IsNullOrEmpty(pickedPath))
+            {
+                _enumsPathProperty.stringValue = VFXProjectPaths.ToProjectRelative(pickedPath, projectRoot);
+
+                // Save now: ExitGUI below skips the ApplyModifiedProperties call at the end of OnInspectorGUI.
+                serializedObject.ApplyModifiedProperties();
+            }
+
+            // The modal dialog breaks the IMGUI layout of this pass, so end it and let Unity redraw the inspector.
+            GUIUtility.ExitGUI();
         }
 
         private static string GetProjectRoot()
@@ -232,20 +258,7 @@ namespace WTFGames.Hephaestus.VFX.Editor
 
         private static string GetAbsoluteEnumsPath(string enumsPath)
         {
-            if (string.IsNullOrEmpty(enumsPath)) return string.Empty;
-
-            return Path.IsPathRooted(enumsPath) ? enumsPath : Path.Combine(GetProjectRoot(), enumsPath);
-        }
-
-        /// <summary>
-        /// Stores folders inside the project relative to its root, so the path works on every machine.
-        /// </summary>
-        private static string ToProjectRelativePath(string absolutePath)
-        {
-            var projectRoot = GetProjectRoot().Replace('\\', '/') + "/";
-            var path = absolutePath.Replace('\\', '/');
-
-            return path.StartsWith(projectRoot) ? path.Substring(projectRoot.Length) : path;
+            return VFXProjectPaths.ToAbsolute(enumsPath, GetProjectRoot());
         }
     }
 }
