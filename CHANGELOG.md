@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file in accordance with the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guidelines.
 
-## [Unreleased]
+## [2.0.1] - 2026-09-25
 
 ### fix
 - Missing VFX assets are created in `Assets/Hephaestus/Config/VFX`, next to the configs of the other Hephaestus packages, instead of `Assets/Hephaestus/VFX`. Assets already created in the old folder are still found and reused.
