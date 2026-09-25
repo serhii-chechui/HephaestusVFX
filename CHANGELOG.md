@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file in accordance with the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) guidelines.
 
-## [Unreleased]
+## [2.0.2] - 2026-09-25
 
 ### fix
 - The folder picked with **Pick** in the `VFXLibraryConstants` inspector is saved and used for the enum export. The folder dialog used to break the inspector layout (`EndLayoutGroup: BeginLayoutGroup must be called first`) before the path was stored.
